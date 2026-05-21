@@ -1,5 +1,9 @@
+import java.util.ArrayList;
+import java.util.Objects;
 import java.util.Random;
 import java.util.Scanner;
+
+
 
 public class Main {
     private static final int ROW_COUNT = 3;
@@ -31,6 +35,62 @@ public class Main {
         startGameLoop(board);
     }
 
+    public static void startGameLoop(String[][] board) {
+        do {
+            makePlayerTurn(board);
+            printBoard(board);
+
+            System.out.println();
+
+            makeBotTurn(board);
+            printBoard(board);
+
+            String gameState = checkGameState(board);
+            if (!Objects.equals(gameState, GAME_STATE_IN_PROGRESS)) {
+                System.out.println(gameState);
+                return;
+            }
+        } while (true);
+
+        //while (gameNotOver)
+        // playerTun
+        // botTurn
+        // checkGameState
+    }
+    private static int calculateNumValue(String cellState) {
+        if (Objects.equals(cellState, CELL_STATE_X))
+            return 1;
+        else if (Objects.equals(cellState, CELL_STATE_0))
+            return -1;
+        else
+            return 0;
+
+    }
+
+    public static boolean areAllCellsTaken(String[][] board) {
+        for (int row = 0; row < ROW_COUNT; row++) {
+            for (int col = 0; col < COL_COUNT; col++) {
+                if (board[row][col].equals(CELL_STATE_EMPTY)) {
+                    return false;
+                }
+            }
+
+        }
+        return true;
+    }
+
+    public static void printBoard(String[][] board) {
+        for (int row = 0; row < ROW_COUNT; row++) {
+            String line = "| ";
+            for (int col = 0; col < COL_COUNT; col++) {
+                line += board[row][col] + " ";
+            }
+            line += "|";
+            System.out.println(line);
+
+        }
+    }
+
     public static String[][] createBoard() {
         String[][] board = new String[ROW_COUNT][COL_COUNT];
 
@@ -40,21 +100,6 @@ public class Main {
             }
         }
         return board;
-    }
-
-    public static void startGameLoop(String[][] board) {
-        makePlayerTurn(board);
-        printBoard(board);
-
-        System.out.println();
-
-        makeBotTurn(board);
-        printBoard(board);
-
-        //while (gameNotOver)
-        // playerTun
-        // botTurn
-        // checkGameState
     }
 
     public static int[] inputCellCoordinates(String[][] board) {
@@ -110,36 +155,49 @@ public class Main {
 
     }
 
-    public static void checkGameState() {
-        // x = 1, 0 - (-1), empty - 0
-        // count sum for rows,columns and diagonals
+    public static String checkGameState(String[][] board) {
+        ArrayList<Integer> sums = new ArrayList<>();
 
-        // if sum.contains(3) -> x won
-        // if sum.contains(-3) -> 0 won
-        // if all cells occupied -> DRAW
-        // else game keep going
-    }
-    public static boolean areAllCellsTaken(String[][] board){
-        for (int row = 0; row < ROW_COUNT ; row++) {
-            for (int col = 0; col < COL_COUNT; col++) {
-                if(!board[row][col].equals(CELL_STATE_EMPTY)){
-                    return  false;
-                }
-            }
-
-        }
-        return true;
-    }
-
-    public static void printBoard(String[][] board) {
         for (int row = 0; row < ROW_COUNT; row++) {
-            String line = "| ";
+            int rowSum = 0;
             for (int col = 0; col < COL_COUNT; col++) {
-                line += board[row][col] + " ";
+                rowSum += calculateNumValue(board[row][col]);
             }
-            line += "|";
-            System.out.println(line);
-
+            sums.add(rowSum);
         }
-    }
+        for (int col = 0; col < COL_COUNT; col++) {
+            int colSum = 0;
+            for (int row = 0; row < ROW_COUNT; row++) {
+                colSum += calculateNumValue(board[row][col]);
+            }
+            sums.add(colSum);
+        }
+        int leftDiagonal = 0;
+        for (int row = 0; row < ROW_COUNT; row++) {
+             leftDiagonal +=calculateNumValue(board[row][row]);
+        }
+        sums.add(leftDiagonal);
+        int rightDiagonal = 0;
+        for (int row = 0; row < ROW_COUNT; row++) {
+            rightDiagonal +=calculateNumValue(board[row][(ROW_COUNT-1)-row]);
+        }
+        sums.add(rightDiagonal);
+
+        if (sums.contains(3))
+            return  GAME_STATE_X_WON;
+        else if (sums.contains(-3))
+            return  GAME_STATE_0_WON;
+        else if (areAllCellsTaken(board))
+            return GAME_STATE_DRAW;
+        else return GAME_STATE_IN_PROGRESS;
+
+    // x = 1, 0 - (-1), empty - 0
+    // count sum for rows,columns and diagonals
+
+    // if sum.contains(3) -> x won
+    // if sum.contains(-3) -> 0 won
+    // if all cells occupied -> DRAW
+    // else game keep going
+
+}
 }
