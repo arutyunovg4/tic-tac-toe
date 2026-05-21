@@ -1,3 +1,4 @@
+import java.util.Random;
 import java.util.Scanner;
 
 public class Main {
@@ -6,16 +7,21 @@ public class Main {
     private static final String CELL_STATE_EMPTY = " ";
     private static final String CELL_STATE_X = "X";
     private static final String CELL_STATE_0 = "0";
+    private static final String GAME_STATE_X_WON = " X победили!";
+    private static final String GAME_STATE_0_WON = " 0 победили!";
+    private static final String GAME_STATE_DRAW = " Ничья!";
+    private static final String GAME_STATE_IN_PROGRESS = " Игра не закончена!";
     private static final Scanner scanner = new Scanner(System.in);
+    private static final Random random = new Random();
 
     public static void main(String[] args) {
-        String[][] board = createBoard();
+//        String[][] board = createBoard();
+//
+//        board[0][0] = CELL_STATE_0;
+//
+//        inputCellCoordinates(board);
 
-        board[0][0] = CELL_STATE_0;
-
-        inputCellCoordinates(board);
-
-        System.out.println("Hi");
+        startGameRound();
     }
 
     public static void startGameRound() {
@@ -37,6 +43,14 @@ public class Main {
     }
 
     public static void startGameLoop(String[][] board) {
+        makePlayerTurn(board);
+        printBoard(board);
+
+        System.out.println();
+
+        makeBotTurn(board);
+        printBoard(board);
+
         //while (gameNotOver)
         // playerTun
         // botTurn
@@ -51,18 +65,17 @@ public class Main {
             try {
                 String[] input = scanner.nextLine().split(" ");
 
-            int row = Integer.parseInt(input[0]);
-            int col = Integer.parseInt(input[1]);
-            if (row >= ROW_COUNT || row < 0 || col >= COL_COUNT || col < 0) {
-                System.out.println("Значения должны быть от 0 до 2");
-            } else if (!board[row][col].equals(CELL_STATE_EMPTY)) {
-                System.out.println("Клетка занята");
-            }
-            else{
-                return new int[]{row, col};
-            }
+                int row = Integer.parseInt(input[0]);
+                int col = Integer.parseInt(input[1]);
+                if (row >= ROW_COUNT || row < 0 || col >= COL_COUNT || col < 0) {
+                    System.out.println("Значения должны быть от 0 до 2");
+                } else if (!board[row][col].equals(CELL_STATE_EMPTY)) {
+                    System.out.println("Клетка занята");
+                } else {
+                    return new int[]{row, col};
+                }
 
-            }catch (RuntimeException e){
+            } catch (RuntimeException e) {
                 System.out.println("Значения должны быть от 0 до 2 и написаны через пробел");
             }
 
@@ -77,7 +90,21 @@ public class Main {
 
     }
 
-    public static void makeBotTurn() {
+    public static void makeBotTurn(String[][] board) {
+        System.out.println("Ход бота");
+        int[] coordinates = getEmptyRandomCellCoordinates(board);
+        board[coordinates[0]][coordinates[1]] = CELL_STATE_0;
+    }
+
+    public static int[] getEmptyRandomCellCoordinates(String[][] board) {
+        do {
+            int row = random.nextInt(ROW_COUNT);
+            int col = random.nextInt(COL_COUNT);
+
+            if (board[row][col].equals(CELL_STATE_EMPTY)) {
+                return new int[]{row, col};
+            }
+        } while (true);
         // get random empty cell
         // place 0 on board
 
@@ -91,5 +118,28 @@ public class Main {
         // if sum.contains(-3) -> 0 won
         // if all cells occupied -> DRAW
         // else game keep going
+    }
+    public static boolean areAllCellsTaken(String[][] board){
+        for (int row = 0; row < ROW_COUNT ; row++) {
+            for (int col = 0; col < COL_COUNT; col++) {
+                if(!board[row][col].equals(CELL_STATE_EMPTY)){
+                    return  false;
+                }
+            }
+
+        }
+        return true;
+    }
+
+    public static void printBoard(String[][] board) {
+        for (int row = 0; row < ROW_COUNT; row++) {
+            String line = "| ";
+            for (int col = 0; col < COL_COUNT; col++) {
+                line += board[row][col] + " ";
+            }
+            line += "|";
+            System.out.println(line);
+
+        }
     }
 }
